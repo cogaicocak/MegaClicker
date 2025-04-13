@@ -156,7 +156,7 @@ local function CreateButton(name, icon)
                 if connections.autoRebirth then connections.autoRebirth:Disconnect() end
                 connections.autoRebirth = game:GetService("RunService").Heartbeat:Connect(function()
                     while true do
-                        local rebirthArgs = {[1] = 5}
+                        local rebirthArgs = {[1] = 500000}
                         game:GetService("ReplicatedStorage").Rebirth:FireServer(unpack(rebirthArgs))
                         wait()
                     end
