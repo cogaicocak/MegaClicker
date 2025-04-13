@@ -1,191 +1,220 @@
 -- Services
-local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Create main GUI
+-- Create main GUI elements
 local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TapSimulatorGUI"
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Main Frame
 local MainFrame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-
--- GUI Properties
-ScreenGui.Name = "AutoFarmGUI"
-ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.ResetOnSpawn = false
-
 MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 300, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
-MainFrame.Size = UDim2.new(0, 200, 0, 250)
-MainFrame.ClipsDescendants = true
 
--- Create corner radius for MainFrame
+-- Round the corners
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.CornerRadius = UDim.new(0, 10)
 UICorner.Parent = MainFrame
 
--- Title setup
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+
+local TitleCorner = UICorner:Clone()
+TitleCorner.Parent = TitleBar
+
+-- Title Text
+local Title = Instance.new("TextLabel")
 Title.Name = "Title"
-Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Font = Enum.Font.SourceSansBold
-Title.Text = "Auto Farm Menu"
+Title.Size = UDim2.new(1, -40, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "Tap Simulator"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16.000
+Title.TextSize = 18
+Title.Font = Enum.Font.GothamBold
+Title.Parent = TitleBar
 
--- Create corner radius for Title
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 8)
-TitleCorner.Parent = Title
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+CloseButton.Text = "×"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 20
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.Parent = TitleBar
 
--- Drag functionality
+local CloseCorner = UICorner:Clone()
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseButton
+
+-- Content Frame
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Name = "ContentFrame"
+ContentFrame.Size = UDim2.new(1, -20, 1, -60)
+ContentFrame.Position = UDim2.new(0, 10, 0, 50)
+ContentFrame.BackgroundTransparency = 1
+ContentFrame.Parent = MainFrame
+
+-- Toggle Button
+local function CreateToggleButton(text, position)
+    local ToggleFrame = Instance.new("Frame")
+    ToggleFrame.Size = UDim2.new(1, 0, 0, 40)
+    ToggleFrame.Position = position
+    ToggleFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 50)
+    ToggleFrame.Parent = ContentFrame
+    
+    local ToggleCorner = UICorner:Clone()
+    ToggleCorner.Parent = ToggleFrame
+    
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Size = UDim2.new(0, 50, 0, 24)
+    ToggleButton.Position = UDim2.new(1, -60, 0.5, -12)
+    ToggleButton.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
+    ToggleButton.Text = ""
+    ToggleButton.Parent = ToggleFrame
+    
+    local ToggleButtonCorner = UICorner:Clone()
+    ToggleButtonCorner.CornerRadius = UDim.new(0, 12)
+    ToggleButtonCorner.Parent = ToggleButton
+    
+    local ToggleCircle = Instance.new("Frame")
+    ToggleCircle.Size = UDim2.new(0, 20, 0, 20)
+    ToggleCircle.Position = UDim2.new(0, 2, 0.5, -10)
+    ToggleCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleCircle.Parent = ToggleButton
+    
+    local ToggleCircleCorner = UICorner:Clone()
+    ToggleCircleCorner.CornerRadius = UDim.new(1, 0)
+    ToggleCircleCorner.Parent = ToggleCircle
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -120, 1, 0)
+    Label.Position = UDim2.new(0, 10, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Label.TextSize = 16
+    Label.Font = Enum.Font.Gotham
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = ToggleFrame
+    
+    return ToggleButton, ToggleCircle
+end
+
+-- Create toggle buttons
+local AutoTapButton, AutoTapCircle = CreateToggleButton("Auto Tap", UDim2.new(0, 0, 0, 0))
+local AutoRebirthButton, AutoRebirthCircle = CreateToggleButton("Auto Rebirth", UDim2.new(0, 0, 0, 50))
+local AutoUpgradeButton, AutoUpgradeCircle = CreateToggleButton("Auto Upgrade", UDim2.new(0, 0, 0, 100))
+
+-- Toggle states
+local toggleStates = {
+    AutoTap = false,
+    AutoRebirth = false,
+    AutoUpgrade = false
+}
+
+-- Animation function for toggle
+local function AnimateToggle(button, circle, enabled)
+    local goalPosition = enabled and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)
+    local goalColor = enabled and Color3.fromRGB(0, 255, 128) or Color3.fromRGB(60, 60, 65)
+    
+    local circleTween = TweenService:Create(circle, TweenInfo.new(0.2), {Position = goalPosition})
+    local colorTween = TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = goalColor})
+    
+    circleTween:Play()
+    colorTween:Play()
+end
+
+-- Make frame draggable
 local dragging
 local dragInput
 local dragStart
 local startPos
 
-local function update(input)
-    local delta = input.Position - dragStart
-    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-        startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-
-Title.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
     end
 end)
 
-Title.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
+TitleBar.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        update(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
     end
 end)
 
--- Function to create buttons
-local function CreateButton(name, pos, parent)
-    local button = Instance.new("TextButton")
-    button.Name = name
-    button.Parent = parent
-    button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-    button.Position = UDim2.new(0.1, 0, pos, 0)
-    button.Size = UDim2.new(0.8, 0, 0, 30)
-    button.Font = Enum.Font.SourceSans
-    button.Text = name
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.TextSize = 14.000
-    
-    -- Add corner radius to button
-    local ButtonCorner = Instance.new("UICorner")
-    ButtonCorner.CornerRadius = UDim.new(0, 6)
-    ButtonCorner.Parent = button
-    
-    local enabled = false
-    local connection
-    
-    button.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        button.BackgroundColor3 = enabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(55, 55, 55)
-        
-        if enabled then
-            if name == "Auto Tap" then
-                connection = RunService.Heartbeat:Connect(function()
-                    local args = {[1] = true}
-                    ReplicatedStorage.Tap:InvokeServer(unpack(args))
-                end)
-            elseif name == "Auto Rebirth" then
-                connection = RunService.Heartbeat:Connect(function()
-                    local args = {[1] = 100000}
-                    ReplicatedStorage.Rebirth:FireServer(unpack(args))
-                end)
-            elseif name == "Auto More Gems" then
-                connection = RunService.Heartbeat:Connect(function()
-                    local args = {[1] = "More Gems"}
-                    ReplicatedStorage.Upgrade:InvokeServer(unpack(args))
-                end)
-            elseif name == "Auto More Taps" then
-                connection = RunService.Heartbeat:Connect(function()
-                    local args = {[1] = "More Taps"}
-                    ReplicatedStorage.Upgrade:InvokeServer(unpack(args))
-                end)
-            elseif name == "Auto Luck" then
-                connection = RunService.Heartbeat:Connect(function()
-                    local args = {[1] = "Luck"}
-                    ReplicatedStorage.Upgrade:InvokeServer(unpack(args))
-                end)
-            end
-            -- Send notification when feature is enabled
-            SendNotification(name .. " Enabled")
-        else
-            if connection then
-                connection:Disconnect()
-                connection = nil
-            end
-            -- Send notification when feature is disabled
-            SendNotification(name .. " Disabled")
-        end
-    end)
-    
-    -- Add hover effect
-    button.MouseEnter:Connect(function()
-        if not enabled then
-            button.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
-        end
-    end)
-    
-    button.MouseLeave:Connect(function()
-        if not enabled then
-            button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-        end
-    end)
-    
-    return button
-end
-
--- Create all buttons
-CreateButton("Auto Tap", 0.2, MainFrame)
-CreateButton("Auto Rebirth", 0.35, MainFrame)
-CreateButton("Auto More Gems", 0.5, MainFrame)
-CreateButton("Auto More Taps", 0.65, MainFrame)
-CreateButton("Auto Luck", 0.8, MainFrame)
-
--- Notification function
-local function SendNotification(message)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Auto Farm",
-        Text = message,
-        Duration = 3,
-        Icon = "rbxassetid://4483345998" -- Optional icon
-    })
-end
-
--- Initial notification
-SendNotification("GUI Loaded! Click buttons to toggle functions.")
-
--- Error handling
-local success, error = pcall(function()
-    -- Your main code here
+game:GetService("RunService").RenderStepped:Connect(function()
+    if dragging and dragInput then
+        local delta = dragInput.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
 end)
 
-if not success then
-    warn("Error in Auto Farm GUI: " .. tostring(error))
-    SendNotification("An error occurred. Check console for details.")
-end
+-- Close button functionality
+CloseButton.MouseButton1Click:Connect(function()
+    toggleStates.AutoTap = false
+    toggleStates.AutoRebirth = false
+    toggleStates.AutoUpgrade = false
+    ScreenGui:Destroy()
+end)
+
+-- Button click handlers
+AutoTapButton.MouseButton1Click:Connect(function()
+    toggleStates.AutoTap = not toggleStates.AutoTap
+    AnimateToggle(AutoTapButton, AutoTapCircle, toggleStates.AutoTap)
+end)
+
+AutoRebirthButton.MouseButton1Click:Connect(function()
+    toggleStates.AutoRebirth = not toggleStates.AutoRebirth
+    AnimateToggle(AutoRebirthButton, AutoRebirthCircle, toggleStates.AutoRebirth)
+end)
+
+AutoUpgradeButton.MouseButton1Click:Connect(function()
+    toggleStates.AutoUpgrade = not toggleStates.AutoUpgrade
+    AnimateToggle(AutoUpgradeButton, AutoUpgradeCircle, toggleStates.AutoUpgrade)
+end)
+
+-- Main loop
+spawn(function()
+    while wait() do
+        if toggleStates.AutoTap then
+            local tapArgs = {[1] = true}
+            ReplicatedStorage.Tap:InvokeServer(unpack(tapArgs))
+        end
+        
+        if toggleStates.AutoRebirth then
+            local rebirthArgs = {[1] = 5}
+            ReplicatedStorage.Rebirth:FireServer(unpack(rebirthArgs))
+        end
+        
+        if toggleStates.AutoUpgrade then
+            local upgrades = {"More Gems", "More Taps", "Luck"}
+            for _, upgradeType in ipairs(upgrades) do
+                local upgradeArgs = {[1] = upgradeType}
+                ReplicatedStorage.Upgrade:InvokeServer(unpack(upgradeArgs))
+            end
+        end
+    end
+end)
