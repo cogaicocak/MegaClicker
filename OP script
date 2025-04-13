@@ -1,0 +1,263 @@
+-- Services
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Create main GUI
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local ButtonsHolder = Instance.new("Frame")
+local UIListLayout = Instance.new("UIListLayout")
+
+-- GUI Properties
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+-- Main Frame Setup
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.Position = UDim2.new(-0.5, 0, 0.2, 0) -- Start off-screen
+MainFrame.Size = UDim2.new(0, 250, 0, 350)
+MainFrame.ClipsDescendants = true
+
+-- Add Gradient
+local UIGradient = Instance.new("UIGradient")
+UIGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 35)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 60))
+})
+UIGradient.Parent = MainFrame
+
+-- Add Corner UI
+local UICorner = Instance.new("UICorner")
+UICorner.Parent = MainFrame
+UICorner.CornerRadius = UDim.new(0, 12)
+
+-- Title Setup
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Auto Farm Menu"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 18.000
+
+-- Add Corner UI for Title
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.Parent = Title
+TitleCorner.CornerRadius = UDim.new(0, 12)
+
+-- Buttons Holder
+ButtonsHolder.Name = "ButtonsHolder"
+ButtonsHolder.Parent = MainFrame
+ButtonsHolder.BackgroundTransparency = 1
+ButtonsHolder.Position = UDim2.new(0, 0, 0, 50)
+ButtonsHolder.Size = UDim2.new(1, 0, 1, -50)
+
+-- UI List Layout
+UIListLayout.Parent = ButtonsHolder
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 10)
+
+-- Function to create buttons with hover effect
+local function CreateButton(name, icon)
+    local Button = Instance.new("TextButton")
+    Button.Name = name
+    Button.Parent = ButtonsHolder
+    Button.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    Button.Size = UDim2.new(0.9, 0, 0, 45)
+    Button.Font = Enum.Font.GothamSemibold
+    Button.Text = name
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 14.000
+    Button.AutoButtonColor = false
+
+    -- Add Corner UI for button
+    local ButtonCorner = Instance.new("UICorner")
+    ButtonCorner.Parent = Button
+    ButtonCorner.CornerRadius = UDim.new(0, 8)
+
+    -- Add Stroke
+    local UIStroke = Instance.new("UIStroke")
+    UIStroke.Parent = Button
+    UIStroke.Color = Color3.fromRGB(60, 60, 80)
+    UIStroke.Thickness = 1
+
+    -- Status indicator
+    local StatusCircle = Instance.new("Frame")
+    StatusCircle.Name = "StatusCircle"
+    StatusCircle.Parent = Button
+    StatusCircle.BackgroundColor3 = Color3.fromRGB(255, 75, 75)
+    StatusCircle.Position = UDim2.new(0.05, 0, 0.5, 0)
+    StatusCircle.AnchorPoint = Vector2.new(0, 0.5)
+    StatusCircle.Size = UDim2.new(0, 10, 0, 10)
+
+    local StatusCorner = Instance.new("UICorner")
+    StatusCorner.Parent = StatusCircle
+    StatusCorner.CornerRadius = UDim.new(1, 0)
+
+    local enabled = false
+    local connection
+
+    -- Hover Effects
+    Button.MouseEnter:Connect(function()
+        TweenService:Create(Button, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(50, 50, 70)}):Play()
+    end)
+
+    Button.MouseLeave:Connect(function()
+        TweenService:Create(Button, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(40, 40, 60)}):Play()
+    end)
+
+    Button.MouseButton1Click:Connect(function()
+        enabled = not enabled
+        
+        -- Click Animation
+        local clickTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.85, 0, 0, 45)})
+        local revertTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.9, 0, 0, 45)})
+        
+        clickTween:Play()
+        clickTween.Completed:Connect(function()
+            revertTween:Play()
+        end)
+
+        -- Status Animation
+        local statusColor = enabled and Color3.fromRGB(75, 255, 75) or Color3.fromRGB(255, 75, 75)
+        TweenService:Create(StatusCircle, TweenInfo.new(0.3), {BackgroundColor3 = statusColor}):Play()
+
+        if enabled then
+            if name == "Auto Tap" then
+                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                    local args = {[1] = true}
+                    game:GetService("ReplicatedStorage").Tap:InvokeServer(unpack(args))
+                end)
+            elseif name == "Auto Rebirth" then
+                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                    local args = {[1] = 5}
+                    game:GetService("ReplicatedStorage").Rebirth:FireServer(unpack(args))
+                end)
+            elseif name == "Auto More Gems" then
+                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                    local args = {[1] = "More Gems"}
+                    game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
+                end)
+            elseif name == "Auto More Taps" then
+                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                    local args = {[1] = "More Taps"}
+                    game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
+                end)
+            elseif name == "Auto Luck" then
+                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                    local args = {[1] = "Luck"}
+                    game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
+                end)
+            end
+        else
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+        end
+    end)
+
+    return Button
+end
+
+-- Create buttons
+local buttons = {
+    {name = "Auto Tap"},
+    {name = "Auto Rebirth"},
+    {name = "Auto More Gems"},
+    {name = "Auto More Taps"},
+    {name = "Auto Luck"}
+}
+
+for _, button in ipairs(buttons) do
+    CreateButton(button.name)
+end
+
+-- Dragging functionality
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+Title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+Title.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        TweenService:Create(MainFrame, TweenInfo.new(0.1), {
+            Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        }):Play()
+    end
+end)
+
+-- Entrance Animation
+TweenService:Create(MainFrame, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    Position = UDim2.new(0.1, 0, 0.2, 0)
+}):Play()
+
+-- Notification with animation
+local function SendNotification(message)
+    local NotificationGui = Instance.new("ScreenGui")
+    local NotificationFrame = Instance.new("Frame")
+    local NotificationText = Instance.new("TextLabel")
+    
+    NotificationGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    
+    NotificationFrame.Name = "NotificationFrame"
+    NotificationFrame.Parent = NotificationGui
+    NotificationFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    NotificationFrame.Position = UDim2.new(0.5, 0, -0.1, 0)
+    NotificationFrame.AnchorPoint = Vector2.new(0.5, 0)
+    NotificationFrame.Size = UDim2.new(0, 250, 0, 60)
+    
+    local NotifCorner = Instance.new("UICorner")
+    NotifCorner.Parent = NotificationFrame
+    NotifCorner.CornerRadius = UDim.new(0, 10)
+    
+    NotificationText.Parent = NotificationFrame
+    NotificationText.BackgroundTransparency = 1
+    NotificationText.Size = UDim2.new(1, 0, 1, 0)
+    NotificationText.Font = Enum.Font.GothamSemibold
+    NotificationText.Text = message
+    NotificationText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NotificationText.TextSize = 14.000
+    
+    -- Notification Animation
+    TweenService:Create(NotificationFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, 0, 0.05, 0)
+    }):Play()
+    
+    wait(2)
+    
+    TweenService:Create(NotificationFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Position = UDim2.new(0.5, 0, -0.1, 0)
+    }):Play()
+    
+    wait(0.5)
+    NotificationGui:Destroy()
+end
+
+SendNotification("Auto Farm Menu Loaded!")
