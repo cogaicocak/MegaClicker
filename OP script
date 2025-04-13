@@ -1,4 +1,8 @@
+-- Services
+local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Create main GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -6,22 +10,24 @@ local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 
 -- GUI Properties
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Name = "AutoFarmGUI"
+ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.ResetOnSpawn = false -- Prevent GUI from disappearing when player respawns
+ScreenGui.ResetOnSpawn = false
 
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 MainFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
 MainFrame.Size = UDim2.new(0, 200, 0, 250)
-MainFrame.Active = true
+MainFrame.ClipsDescendants = true
 
--- Add Corner UI
+-- Create corner radius for MainFrame
 local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
-UICorner.CornerRadius = UDim.new(0, 10)
 
+-- Title setup
 Title.Name = "Title"
 Title.Parent = MainFrame
 Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
@@ -31,12 +37,12 @@ Title.Text = "Auto Farm Menu"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16.000
 
--- Add Corner UI for Title
+-- Create corner radius for Title
 local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 8)
 TitleCorner.Parent = Title
-TitleCorner.CornerRadius = UDim.new(0, 10)
 
--- Dragging functionality
+-- Drag functionality
 local dragging
 local dragInput
 local dragStart
@@ -44,7 +50,8 @@ local startPos
 
 local function update(input)
     local delta = input.Position - dragStart
-    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+        startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
 Title.InputBegan:Connect(function(input)
@@ -86,10 +93,10 @@ local function CreateButton(name, pos, parent)
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.TextSize = 14.000
     
-    -- Add Corner UI for buttons
+    -- Add corner radius to button
     local ButtonCorner = Instance.new("UICorner")
-    ButtonCorner.Parent = button
     ButtonCorner.CornerRadius = UDim.new(0, 6)
+    ButtonCorner.Parent = button
     
     local enabled = false
     local connection
@@ -100,36 +107,53 @@ local function CreateButton(name, pos, parent)
         
         if enabled then
             if name == "Auto Tap" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                connection = RunService.Heartbeat:Connect(function()
                     local args = {[1] = true}
-                    game:GetService("ReplicatedStorage").Tap:InvokeServer(unpack(args))
+                    ReplicatedStorage.Tap:InvokeServer(unpack(args))
                 end)
             elseif name == "Auto Rebirth" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                connection = RunService.Heartbeat:Connect(function()
                     local args = {[1] = 100000}
-                    game:GetService("ReplicatedStorage").Rebirth:FireServer(unpack(args))
+                    ReplicatedStorage.Rebirth:FireServer(unpack(args))
                 end)
             elseif name == "Auto More Gems" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                connection = RunService.Heartbeat:Connect(function()
                     local args = {[1] = "More Gems"}
-                    game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
+                    ReplicatedStorage.Upgrade:InvokeServer(unpack(args))
                 end)
             elseif name == "Auto More Taps" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                connection = RunService.Heartbeat:Connect(function()
                     local args = {[1] = "More Taps"}
-                    game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
+                    ReplicatedStorage.Upgrade:InvokeServer(unpack(args))
                 end)
             elseif name == "Auto Luck" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+                connection = RunService.Heartbeat:Connect(function()
                     local args = {[1] = "Luck"}
-                    game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
+                    ReplicatedStorage.Upgrade:InvokeServer(unpack(args))
                 end)
             end
+            -- Send notification when feature is enabled
+            SendNotification(name .. " Enabled")
         else
             if connection then
                 connection:Disconnect()
                 connection = nil
             end
+            -- Send notification when feature is disabled
+            SendNotification(name .. " Disabled")
+        end
+    end)
+    
+    -- Add hover effect
+    button.MouseEnter:Connect(function()
+        if not enabled then
+            button.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
+        end
+    end)
+    
+    button.MouseLeave:Connect(function()
+        if not enabled then
+            button.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
         end
     end)
     
@@ -143,13 +167,25 @@ CreateButton("Auto More Gems", 0.5, MainFrame)
 CreateButton("Auto More Taps", 0.65, MainFrame)
 CreateButton("Auto Luck", 0.8, MainFrame)
 
--- Notification
+-- Notification function
 local function SendNotification(message)
     game.StarterGui:SetCore("SendNotification", {
         Title = "Auto Farm",
         Text = message,
-        Duration = 3
+        Duration = 3,
+        Icon = "rbxassetid://4483345998" -- Optional icon
     })
 end
 
+-- Initial notification
 SendNotification("GUI Loaded! Click buttons to toggle functions.")
+
+-- Error handling
+local success, error = pcall(function()
+    -- Your main code here
+end)
+
+if not success then
+    warn("Error in Auto Farm GUI: " .. tostring(error))
+    SendNotification("An error occurred. Check console for details.")
+end
