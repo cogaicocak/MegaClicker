@@ -111,56 +111,68 @@ local function CreateButton(name, icon)
         TweenService:Create(Button, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(40, 40, 60)}):Play()
     end)
 
-    Button.MouseButton1Click:Connect(function()
-        enabled = not enabled
-        
-        -- Click Animation
-        local clickTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.85, 0, 0, 45)})
-        local revertTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.9, 0, 0, 45)})
-        
-        clickTween:Play()
-        clickTween.Completed:Connect(function()
-            revertTween:Play()
-        end)
+    -- [Previous GUI code remains the same until the button click function]
 
-        -- Status Animation
-        local statusColor = enabled and Color3.fromRGB(75, 255, 75) or Color3.fromRGB(255, 75, 75)
-        TweenService:Create(StatusCircle, TweenInfo.new(0.3), {BackgroundColor3 = statusColor}):Play()
+Button.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    
+    -- Click Animation
+    local clickTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.85, 0, 0, 45)})
+    local revertTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.9, 0, 0, 45)})
+    
+    clickTween:Play()
+    clickTween.Completed:Connect(function()
+        revertTween:Play()
+    end)
 
-        if enabled then
-            if name == "Auto Tap" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+    -- Status Animation
+    local statusColor = enabled and Color3.fromRGB(75, 255, 75) or Color3.fromRGB(255, 75, 75)
+    TweenService:Create(StatusCircle, TweenInfo.new(0.3), {BackgroundColor3 = statusColor}):Play()
+
+    if enabled then
+        if name == "Auto Tap" then
+            connection = game:GetService("RunService").Heartbeat:Connect(function()
+                task.spawn(function()
                     local args = {[1] = true}
                     game:GetService("ReplicatedStorage").Tap:InvokeServer(unpack(args))
                 end)
-            elseif name == "Auto Rebirth" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+            end)
+        elseif name == "Auto Rebirth" then
+            connection = game:GetService("RunService").Heartbeat:Connect(function()
+                task.spawn(function()
                     local args = {[1] = 5}
                     game:GetService("ReplicatedStorage").Rebirth:FireServer(unpack(args))
                 end)
-            elseif name == "Auto More Gems" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+            end)
+        elseif name == "Auto More Gems" then
+            connection = game:GetService("RunService").Heartbeat:Connect(function()
+                task.spawn(function()
                     local args = {[1] = "More Gems"}
                     game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
                 end)
-            elseif name == "Auto More Taps" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+            end)
+        elseif name == "Auto More Taps" then
+            connection = game:GetService("RunService").Heartbeat:Connect(function()
+                task.spawn(function()
                     local args = {[1] = "More Taps"}
                     game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
                 end)
-            elseif name == "Auto Luck" then
-                connection = game:GetService("RunService").Heartbeat:Connect(function()
+            end)
+        elseif name == "Auto Luck" then
+            connection = game:GetService("RunService").Heartbeat:Connect(function()
+                task.spawn(function()
                     local args = {[1] = "Luck"}
                     game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
                 end)
-            end
-        else
-            if connection then
-                connection:Disconnect()
-                connection = nil
-            end
+            end)
         end
-    end)
+    else
+        if connection then
+            connection:Disconnect()
+            connection = nil
+        end
+    end
+end)
 
     return Button
 end
