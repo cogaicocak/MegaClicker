@@ -39,11 +39,35 @@ Title.Name = "Title"
 Title.Size = UDim2.new(1, -40, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "Tap Simulator"
+Title.Text = "Tap Simulator GUI"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 18
 Title.Font = Enum.Font.GothamBold
 Title.Parent = TitleBar
+
+-- Time Label
+local TimeLabel = Instance.new("TextLabel")
+TimeLabel.Name = "TimeLabel"
+TimeLabel.Size = UDim2.new(1, -40, 0, 20)
+TimeLabel.Position = UDim2.new(0, 10, 0, 40)
+TimeLabel.BackgroundTransparency = 1
+TimeLabel.Text = "Last Updated: 2025-04-13 11:55:07 UTC"
+TimeLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+TimeLabel.TextSize = 12
+TimeLabel.Font = Enum.Font.Gotham
+TimeLabel.Parent = MainFrame
+
+-- User Label
+local UserLabel = Instance.new("TextLabel")
+UserLabel.Name = "UserLabel"
+UserLabel.Size = UDim2.new(1, -40, 0, 20)
+UserLabel.Position = UDim2.new(0, 10, 0, 60)
+UserLabel.BackgroundTransparency = 1
+UserLabel.Text = "User: cogaicocak"
+UserLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+UserLabel.TextSize = 12
+UserLabel.Font = Enum.Font.Gotham
+UserLabel.Parent = MainFrame
 
 -- Close Button
 local CloseButton = Instance.new("TextButton")
@@ -64,12 +88,12 @@ CloseCorner.Parent = CloseButton
 -- Content Frame
 local ContentFrame = Instance.new("Frame")
 ContentFrame.Name = "ContentFrame"
-ContentFrame.Size = UDim2.new(1, -20, 1, -60)
-ContentFrame.Position = UDim2.new(0, 10, 0, 50)
+ContentFrame.Size = UDim2.new(1, -20, 1, -100)
+ContentFrame.Position = UDim2.new(0, 10, 0, 90)
 ContentFrame.BackgroundTransparency = 1
 ContentFrame.Parent = MainFrame
 
--- Toggle Button
+-- Toggle Button Creation Function
 local function CreateToggleButton(text, position)
     local ToggleFrame = Instance.new("Frame")
     ToggleFrame.Size = UDim2.new(1, 0, 0, 40)
@@ -196,19 +220,30 @@ AutoUpgradeButton.MouseButton1Click:Connect(function()
     AnimateToggle(AutoUpgradeButton, AutoUpgradeCircle, toggleStates.AutoUpgrade)
 end)
 
--- Main loop
+-- Separate loops for better performance
+-- Auto Tap Loop
 spawn(function()
     while wait() do
         if toggleStates.AutoTap then
             local tapArgs = {[1] = true}
             ReplicatedStorage.Tap:InvokeServer(unpack(tapArgs))
         end
-        
+    end
+end)
+
+-- Auto Rebirth Loop
+spawn(function()
+    while wait(0.1) do
         if toggleStates.AutoRebirth then
             local rebirthArgs = {[1] = 100000}
             ReplicatedStorage.Rebirth:FireServer(unpack(rebirthArgs))
         end
-        
+    end
+end)
+
+-- Auto Upgrade Loop
+spawn(function()
+    while wait(0.2) do
         if toggleStates.AutoUpgrade then
             local upgrades = {"More Gems", "More Taps", "Luck"}
             for _, upgradeType in ipairs(upgrades) do
