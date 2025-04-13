@@ -2,6 +2,15 @@
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
+-- Connections table
+local connections = {
+    autoTap = nil,
+    autoRebirth = nil,
+    autoGems = nil,
+    autoTaps = nil,
+    autoLuck = nil
+}
+
 -- Create main GUI
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
@@ -12,6 +21,7 @@ local UIListLayout = Instance.new("UIListLayout")
 -- GUI Properties
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
+ScreenGui.Name = "AutoFarmGUI"
 
 -- Main Frame Setup
 MainFrame.Name = "MainFrame"
@@ -100,7 +110,6 @@ local function CreateButton(name, icon)
     StatusCorner.CornerRadius = UDim.new(1, 0)
 
     local enabled = false
-    local connection
 
     -- Hover Effects
     Button.MouseEnter:Connect(function()
@@ -111,68 +120,74 @@ local function CreateButton(name, icon)
         TweenService:Create(Button, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(40, 40, 60)}):Play()
     end)
 
-    -- [Previous GUI code remains the same until the button click function]
+    Button.MouseButton1Click:Connect(function()
+        enabled = not enabled
+        
+        -- Click Animation
+        local clickTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.85, 0, 0, 45)})
+        local revertTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.9, 0, 0, 45)})
+        
+        clickTween:Play()
+        clickTween.Completed:Connect(function()
+            revertTween:Play()
+        end)
 
-Button.MouseButton1Click:Connect(function()
-    enabled = not enabled
-    
-    -- Click Animation
-    local clickTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.85, 0, 0, 45)})
-    local revertTween = TweenService:Create(Button, TweenInfo.new(0.1), {Size = UDim2.new(0.9, 0, 0, 45)})
-    
-    clickTween:Play()
-    clickTween.Completed:Connect(function()
-        revertTween:Play()
-    end)
+        -- Status Animation
+        local statusColor = enabled and Color3.fromRGB(75, 255, 75) or Color3.fromRGB(255, 75, 75)
+        TweenService:Create(StatusCircle, TweenInfo.new(0.3), {BackgroundColor3 = statusColor}):Play()
 
-    -- Status Animation
-    local statusColor = enabled and Color3.fromRGB(75, 255, 75) or Color3.fromRGB(255, 75, 75)
-    TweenService:Create(StatusCircle, TweenInfo.new(0.3), {BackgroundColor3 = statusColor}):Play()
-
-    if enabled then
-        if name == "Auto Tap" then
-            connection = game:GetService("RunService").Heartbeat:Connect(function()
-                task.spawn(function()
+        if enabled then
+            if name == "Auto Tap" then
+                if connections.autoTap then connections.autoTap:Disconnect() end
+                connections.autoTap = game:GetService("RunService").Heartbeat:Connect(function()
                     local args = {[1] = true}
                     game:GetService("ReplicatedStorage").Tap:InvokeServer(unpack(args))
                 end)
-            end)
-        elseif name == "Auto Rebirth" then
-            connection = game:GetService("RunService").Heartbeat:Connect(function()
-                task.spawn(function()
-                    local args = {[1] = 5}
+            elseif name == "Auto Rebirth" then
+                if connections.autoRebirth then connections.autoRebirth:Disconnect() end
+                connections.autoRebirth = game:GetService("RunService").Heartbeat:Connect(function()
+                    local args = {[1] = 500000}
                     game:GetService("ReplicatedStorage").Rebirth:FireServer(unpack(args))
                 end)
-            end)
-        elseif name == "Auto More Gems" then
-            connection = game:GetService("RunService").Heartbeat:Connect(function()
-                task.spawn(function()
+            elseif name == "Auto More Gems" then
+                if connections.autoGems then connections.autoGems:Disconnect() end
+                connections.autoGems = game:GetService("RunService").Heartbeat:Connect(function()
                     local args = {[1] = "More Gems"}
                     game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
                 end)
-            end)
-        elseif name == "Auto More Taps" then
-            connection = game:GetService("RunService").Heartbeat:Connect(function()
-                task.spawn(function()
+            elseif name == "Auto More Taps" then
+                if connections.autoTaps then connections.autoTaps:Disconnect() end
+                connections.autoTaps = game:GetService("RunService").Heartbeat:Connect(function()
                     local args = {[1] = "More Taps"}
                     game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
                 end)
-            end)
-        elseif name == "Auto Luck" then
-            connection = game:GetService("RunService").Heartbeat:Connect(function()
-                task.spawn(function()
+            elseif name == "Auto Luck" then
+                if connections.autoLuck then connections.autoLuck:Disconnect() end
+                connections.autoLuck = game:GetService("RunService").Heartbeat:Connect(function()
                     local args = {[1] = "Luck"}
                     game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
                 end)
-            end)
+            end
+        else
+            -- Disconnect the specific connection when disabled
+            if name == "Auto Tap" and connections.autoTap then
+                connections.autoTap:Disconnect()
+                connections.autoTap = nil
+            elseif name == "Auto Rebirth" and connections.autoRebirth then
+                connections.autoRebirth:Disconnect()
+                connections.autoRebirth = nil
+            elseif name == "Auto More Gems" and connections.autoGems then
+                connections.autoGems:Disconnect()
+                connections.autoGems = nil
+            elseif name == "Auto More Taps" and connections.autoTaps then
+                connections.autoTaps:Disconnect()
+                connections.autoTaps = nil
+            elseif name == "Auto Luck" and connections.autoLuck then
+                connections.autoLuck:Disconnect()
+                connections.autoLuck = nil
+            end
         end
-    else
-        if connection then
-            connection:Disconnect()
-            connection = nil
-        end
-    end
-end)
+    end)
 
     return Button
 end
