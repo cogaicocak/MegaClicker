@@ -106,7 +106,7 @@ local function CreateButton(name, pos, parent)
                 end)
             elseif name == "Auto Rebirth" then
                 connection = game:GetService("RunService").Heartbeat:Connect(function()
-                    local args = {[1] = 5}
+                    local args = {[1] = 100000}
                     game:GetService("ReplicatedStorage").Rebirth:FireServer(unpack(args))
                 end)
             elseif name == "Auto More Gems" then
