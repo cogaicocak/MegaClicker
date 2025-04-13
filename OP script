@@ -1,3 +1,9 @@
+--[[ 
+    Auto Farm GUI
+    Created by: cogaicocak
+    Last updated: 2025-04-13 10:17:36 UTC
+]]
+
 -- Services
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -140,36 +146,51 @@ local function CreateButton(name, icon)
             if name == "Auto Tap" then
                 if connections.autoTap then connections.autoTap:Disconnect() end
                 connections.autoTap = game:GetService("RunService").Heartbeat:Connect(function()
-                    local args = {[1] = true}
-                    game:GetService("ReplicatedStorage").Tap:InvokeServer(unpack(args))
+                    while true do
+                        local tapArgs = {[1] = true}
+                        game:GetService("ReplicatedStorage").Tap:InvokeServer(unpack(tapArgs))
+                        wait()
+                    end
                 end)
             elseif name == "Auto Rebirth" then
                 if connections.autoRebirth then connections.autoRebirth:Disconnect() end
                 connections.autoRebirth = game:GetService("RunService").Heartbeat:Connect(function()
-                    local args = {[1] = 500000}
-                    game:GetService("ReplicatedStorage").Rebirth:FireServer(unpack(args))
+                    while true do
+                        local rebirthArgs = {[1] = 5}
+                        game:GetService("ReplicatedStorage").Rebirth:FireServer(unpack(rebirthArgs))
+                        wait()
+                    end
                 end)
             elseif name == "Auto More Gems" then
                 if connections.autoGems then connections.autoGems:Disconnect() end
                 connections.autoGems = game:GetService("RunService").Heartbeat:Connect(function()
-                    local args = {[1] = "More Gems"}
-                    game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
+                    while true do
+                        local upgradeArgs = {[1] = "More Gems"}
+                        game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(upgradeArgs))
+                        wait()
+                    end
                 end)
             elseif name == "Auto More Taps" then
                 if connections.autoTaps then connections.autoTaps:Disconnect() end
                 connections.autoTaps = game:GetService("RunService").Heartbeat:Connect(function()
-                    local args = {[1] = "More Taps"}
-                    game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
+                    while true do
+                        local upgradeArgs = {[1] = "More Taps"}
+                        game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(upgradeArgs))
+                        wait()
+                    end
                 end)
             elseif name == "Auto Luck" then
                 if connections.autoLuck then connections.autoLuck:Disconnect() end
                 connections.autoLuck = game:GetService("RunService").Heartbeat:Connect(function()
-                    local args = {[1] = "Luck"}
-                    game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(args))
+                    while true do
+                        local upgradeArgs = {[1] = "Luck"}
+                        game:GetService("ReplicatedStorage").Upgrade:InvokeServer(unpack(upgradeArgs))
+                        wait()
+                    end
                 end)
             end
         else
-            -- Disconnect the specific connection when disabled
+            -- Disconnect when disabled
             if name == "Auto Tap" and connections.autoTap then
                 connections.autoTap:Disconnect()
                 connections.autoTap = nil
