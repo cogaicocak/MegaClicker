@@ -205,7 +205,7 @@ spawn(function()
         end
         
         if toggleStates.AutoRebirth then
-            local rebirthArgs = {[1] = 5}
+            local rebirthArgs = {[1] = 100000}
             ReplicatedStorage.Rebirth:FireServer(unpack(rebirthArgs))
         end
         
